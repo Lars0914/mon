@@ -53,8 +53,12 @@ app.post('/api/webhook', async (req, res) => {
       const usdtContract = 'tr7nhqjekqxgtci8q8zy4pl8otszgjlj6t'; // USDT TRC20 (lowercase)
 
       // Native TRX or USDT TRC20
-      if ((type === 'native' && body.asset === 'TRON') || (type === 'token' && tokenId.toLowerCase() === usdtContract)) {
-        messages.push(`Amount: ${amount} "\n" Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`);
+       // Handle INCOMING_INTERNAL_TX (likely native TRX) or ADDRESS_EVENT (native/token)
+      if (subscriptionType === 'INCOMING_INTERNAL_TX' || 
+          (subscriptionType === 'ADDRESS_EVENT' && 
+           ((type === 'native' && body.asset === 'TRON') || 
+            (type === 'token' && tokenId && tokenId.toLowerCase() === usdtContract)))) {
+        messages.push(`Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`);
       }
     } else {
       // Unsupported payload
