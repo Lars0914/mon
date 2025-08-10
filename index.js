@@ -31,7 +31,7 @@ app.post("/api/webhook", async (req, res) => {
         if (valueWei > 0n && amount != 0) {
           const txId = tx.hash;
           messages.push(
-            `Amount: ${amount} "\n" Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`
+            `Amount: ${amount} "\n"  On ${chainName}: ${explorerUrl}${txId}`
           );
         }
       }
@@ -42,7 +42,7 @@ app.post("/api/webhook", async (req, res) => {
         if (transfer.contract.toLowerCase() === usdtContract && amount != 0) {
           const txId = transfer.transactionHash;
           messages.push(
-            `Amount: ${amount} "\n" Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`
+            `Amount: ${amount} "\n"  On ${chainName}: ${explorerUrl}${txId}`
           );
         }
       }
@@ -77,7 +77,7 @@ app.post("/api/webhook", async (req, res) => {
               tokenId.toLowerCase() === usdtContract)))
       ) {
         messages.push(
-          `Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`
+          ` On ${chainName}: ${explorerUrl}${txId}`
         );
       }
     } else {
