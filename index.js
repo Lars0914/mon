@@ -27,8 +27,8 @@ app.post("/api/webhook", async (req, res) => {
       // Native transfers
       for (const tx of txs) {
         const valueWei = BigInt(tx.value || "0");
-        if (valueWei > 0n) {
-          const amount = (Number(valueWei) / 1e18).toFixed(6);
+        const amount = (Number(valueWei) / 1e18).toFixed(6);
+        if (valueWei > 0n && amount != 0) {
           const txId = tx.hash;
           messages.push(
             `Amount: ${amount} "\n" Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`
@@ -38,9 +38,9 @@ app.post("/api/webhook", async (req, res) => {
 
       // USDT transfers (ERC20/BEP20)
       for (const transfer of erc20Transfers) {
-        if (transfer.contract.toLowerCase() === usdtContract) {
+        const amount = parseFloat(transfer.valueWithDecimals).toFixed(6);
+        if (transfer.contract.toLowerCase() === usdtContract && amount != 0) {
           const txId = transfer.transactionHash;
-          const amount = parseFloat(transfer.valueWithDecimals).toFixed(6);
           messages.push(
             `Amount: ${amount} "\n" Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`
           );
