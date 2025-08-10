@@ -4,7 +4,7 @@ const app = express();
 
 app.use(express.json());
 
-// Webhook endpoint for Moralis Streams (now supports Ethereum '0x1' and BSC '0x38')
+// Webhook endpoint for Moralis Streams (supports Ethereum '0x1' and BSC '0x38')
 app.post('/api/webhook', async (req, res) => {
   try {
     const { confirmed, chainId, txs = [], erc20Transfers = [] } = req.body;
@@ -12,7 +12,7 @@ app.post('/api/webhook', async (req, res) => {
     // Determine chain-specific details
     const isEthereum = chainId === '0x1';
     const chainName = isEthereum ? 'Ethereum' : 'BSC';
-    const nativeSymbol = isEthereum ? 'ETH' : 'BNB';
+    const explorerUrl = isEthereum ? 'https://etherscan.io/tx/' : 'https://bscscan.com/tx/';
     const usdtContract = isEthereum ? '0xdac17f958d2ee523a2206206994597c13d831ec7' : '0x55d398326f99059ff775485246999027b3197955';
 
     const messages = [];
@@ -21,10 +21,8 @@ app.post('/api/webhook', async (req, res) => {
     for (const tx of txs) {
       const valueWei = BigInt(tx.value || '0');
       if (valueWei > 0n) {
-        const amount = (Number(valueWei) / 1e18).toFixed(6);
         const txId = tx.hash;
-        const to = tx.toAddress;
-        messages.push(`Received ${amount} ${nativeSymbol} to ${to} on ${chainName}. Transaction ID: ${txId}`);
+        messages.push(`Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`);
       }
     }
 
@@ -32,11 +30,8 @@ app.post('/api/webhook', async (req, res) => {
     // Remove the if() below to include all ERC20/BEP20 tokens, not just USDT
     for (const transfer of erc20Transfers) {
       if (transfer.contract.toLowerCase() === usdtContract) {
-        const amount = parseFloat(transfer.valueWithDecimals).toFixed(6);
-        const symbol = transfer.tokenSymbol || 'USDT';
         const txId = transfer.transactionHash;
-        const to = transfer.to;
-        messages.push(`Received ${amount} ${symbol} to ${to} on ${chainName}. Transaction ID: ${txId}`);
+        messages.push(`Transaction ID: ${txId} on ${chainName}: ${explorerUrl}${txId}`);
       }
     }
 
